@@ -558,7 +558,7 @@ contract ERC20 is Context, IERC20 {
     mapping (address => mapping (address => uint256)) private _allowances;
 
     uint256 private _totalSupply;
-    uint256 private _maxSupply = 500000; // 500K
+    uint256 private _maxSupply = (500000000) * (10**18); //500 Million
 
     string private _name;
     string private _symbol;
@@ -747,7 +747,7 @@ contract ERC20 is Context, IERC20 {
      */
     function _mint(address account, uint256 amount) internal virtual {
         require(account != address(0), "ERC20: mint to the zero address");
-        require(_totalSupply.add(amount) > _maxSupply, "ERC20: Max Supply Limit Exceeded");
+        require(_totalSupply.add(amount) <= _maxSupply, "ERC20: Max Supply Limit Exceeded");
 
         _beforeTokenTransfer(address(0), account, amount);
 
@@ -827,7 +827,7 @@ contract ERC20 is Context, IERC20 {
 }
 
 // HyFiToken with Governance.
-contract HyFiToken is ERC20("hyfi.finance", "HyFi"), Ownable {
+contract HyFiToken is ERC20("hyfi.token", "HyFi"), Ownable {
 
     constructor () public { }
 
@@ -1048,5 +1048,14 @@ contract Master is Ownable {
         } else {
             hyfi.transfer(_to, _amount);
         }
+    }
+    
+    function transferHyfiOwnership(address newOwner) public onlyOwner {
+        hyfi.transferOwnership(newOwner);
+    }
+    
+    function updateBonusEndBlock(uint256 newBonusEndBlock) public onlyOwner {
+        require(newBonusEndBlock > block.number, "New bonus end block must be greate than current block number");
+        bonusEndBlock = newBonusEndBlock;
     }
 }
